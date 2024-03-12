@@ -16,7 +16,8 @@ static double CalcAverage(int[] numbers) {
    return (double)sum/numbers.Length;
 }
 
-int max = CalcMaximum(numbers);
+int[] numbers2 = {100, 66, 13, 74, 111, 97};
+int max = CalcMaximum(numbers2);
 Console.WriteLine("Maximum: " + max);
 
 
