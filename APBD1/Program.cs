@@ -7,13 +7,13 @@ double average = CalcAverage(numbers);
 Console.WriteLine("Average: " + average);
 
 static double CalcAverage(int[] numbers) {
-   int sum2 = 0;
+   int sum1 = 0;
    
    foreach (int n in numbers) {
-      sum2 += n;
+      sum1 += n;
    }
 
-   return (double)sum2/numbers.Length;
+   return (double)sum1/numbers.Length;
 }
 
 int[] numbers2 = {100, 66, 13, 74, 111, 97};
