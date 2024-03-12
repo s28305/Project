@@ -15,3 +15,20 @@ static double CalcAverage(int[] numbers) {
 
    return (double)sum/numbers.Length;
 }
+
+int max = CalcMaximum(numbers);
+Console.WriteLine("Maximum: " + max);
+
+
+ static int CalcMaximum(int[] numbers) {
+   int max = numbers[0];
+
+   
+   foreach (int num in numbers) {
+      if (num > max) {
+         max = num;
+      }
+   }
+
+   return max;
+}
