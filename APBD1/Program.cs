@@ -7,5 +7,11 @@ double average = CalcAverage(numbers);
 Console.WriteLine("Average: " + average);
 
 static double CalcAverage(int[] numbers) {
-   return 0;
+   int sum = 0;
+   
+   foreach (int n in numbers) {
+      sum += n;
+   }
+
+   return (double)sum/numbers.Length;
 }
