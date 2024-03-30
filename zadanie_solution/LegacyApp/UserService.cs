@@ -4,6 +4,9 @@ namespace LegacyApp
 {
     public class UserService
     {
+        private static readonly ClientRepository ClientRepository = new ClientRepository();
+        private static readonly UserCreditService UserCreditService = new UserCreditService();
+
         public static bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
 
@@ -12,8 +15,7 @@ namespace LegacyApp
                 return false;
             }
             
-            var clientRepository = new ClientRepository();
-            var client = clientRepository.GetById(clientId);
+            var client = ClientRepository.GetById(clientId);
             
             var user = new User(new CreditData())
             {
@@ -67,8 +69,7 @@ namespace LegacyApp
 
         private static ICreditData SetCreditData(User user, int multiplier = 1)
         {
-            using var userCreditService = new UserCreditService();
-            var creditLimit = userCreditService.GetCreditLimit(user.LastName) * multiplier;
+            var creditLimit = UserCreditService.GetCreditLimit(user.LastName) * multiplier;
             
             return new CreditData { HasCreditLimit = true, CreditLimit = creditLimit };
         }
