@@ -1,6 +1,6 @@
 ﻿namespace LegacyApp
 {
-    public class CreditData: ICreditData
+    public class CreditData
     { 
         public bool HasCreditLimit { get; set; }
         public int CreditLimit { get; set; }

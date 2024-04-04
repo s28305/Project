@@ -10,9 +10,9 @@ namespace LegacyApp
         public string FirstName { get; internal set; }
         public string LastName { get; internal set; }
 
-        public ICreditData CreditData { get; internal set; }
+        public CreditData CreditData { get; internal set; }
 
-        public User(ICreditData creditData)
+        public User(CreditData creditData)
         {
             CreditData = creditData;
         }

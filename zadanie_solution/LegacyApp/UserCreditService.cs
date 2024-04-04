@@ -4,7 +4,8 @@ using System.Threading;
 
 namespace LegacyApp
 {
-    public class UserCreditService : IDisposable
+    //Single responsibility principle prohibits having both data retrieving and disposing in one class
+    public class UserCreditService: IUserCreditService
     {
         /// <summary>
         /// Simulating database
@@ -19,16 +20,23 @@ namespace LegacyApp
                 {"Kwiatkowski", 1000}
             };
         
-        public void Dispose()
+        private readonly IDisposable _disposable;
+
+        public UserCreditService(IDisposable disposable)
         {
-            //Simulating disposing of resources
+            _disposable = disposable;
         }
 
+        public void Dispose()
+        {
+            _disposable.Dispose();
+        }
+        
         /// <summary>
         /// This method is simulating contact with remote service which is used to get info about someone's credit limit
         /// </summary>
         /// <returns>Client's credit limit</returns>
-        internal int GetCreditLimit(string lastName)
+        public int GetCreditLimit(string lastName)
         {
             var randomWaitingTime = new Random().Next(3000);
             Thread.Sleep(randomWaitingTime);
