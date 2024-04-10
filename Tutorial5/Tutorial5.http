@@ -1,0 +1,6 @@
+@Tutorial5_HostAddress = http://localhost:5212
+
+GET {{Tutorial5_HostAddress}}/animals/
+Accept: application/json
+
+###
