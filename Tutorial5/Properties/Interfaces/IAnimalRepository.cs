@@ -1,4 +1,6 @@
-namespace Tutorial5;
+using Tutorial5.Properties.Classes;
+
+namespace Tutorial5.Properties.Interfaces;
 
 public interface IAnimalRepository
 {

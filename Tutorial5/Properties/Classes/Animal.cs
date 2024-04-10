@@ -1,4 +1,4 @@
-namespace Tutorial5;
+namespace Tutorial5.Properties.Classes;
 
 public class Animal(int id, string name, string category, double weight, string furColor)
 {
