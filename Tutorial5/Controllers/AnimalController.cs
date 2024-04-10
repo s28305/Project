@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Tutorial5.Properties.Interfaces;
+using Tutorial5.Models;
+using Tutorial5.Interfaces;
 
-namespace Tutorial5.Properties.Classes;
+namespace Tutorial5.Controllers;
 
 [ApiController]
 [Route("api/animals")]

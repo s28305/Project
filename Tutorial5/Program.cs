@@ -1,5 +1,5 @@
-using Tutorial5.Properties.Classes;
-using Tutorial5.Properties.Interfaces;
+using Tutorial5.Interfaces;
+using Tutorial5.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,6 +1,7 @@
-using Tutorial5.Properties.Interfaces;
+using Tutorial5.Interfaces;
+using Tutorial5.Models;
 
-namespace Tutorial5.Properties.Classes;
+namespace Tutorial5.Repositories;
 
 public class AnimalRepository: IAnimalRepository
 {

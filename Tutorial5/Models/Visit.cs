@@ -1,4 +1,4 @@
-namespace Tutorial5.Properties.Classes;
+namespace Tutorial5.Models;
 
 public class Visit(DateTime date, string description, double price, Animal animal)
 {
