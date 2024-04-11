@@ -27,7 +27,16 @@ public class AnimalRepository: IAnimalRepository
 
     public void Edit(Animal animal)
     {
-        Animals[animal.Id] = animal;
+        var index = Animals.FindIndex(a => a.Id == animal.Id);
+        
+        if (index != -1)
+        {
+            Animals[index] = animal;
+        }
+        else
+        {
+            throw new InvalidOperationException($"Animal with id {animal.Id} doesn't exist");
+        }
     }
 
     public bool Delete(int id)
