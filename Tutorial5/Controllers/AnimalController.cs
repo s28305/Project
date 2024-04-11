@@ -13,11 +13,13 @@ public class AnimalController(IAnimalRepository animalRepository) : ControllerBa
     {
         return animalRepository.GetAll();
     }
+    
 
     [HttpGet("{id}")]
-    public Animal GetById(int id)
+    public IActionResult GetById(int id)
     {
-        return animalRepository.GetById(id);
+        var animal = animalRepository.GetById(id);
+        return animal == null ? NotFound($"Animal with Id {id} not found.") : Ok(animal);
     }
 
     [HttpPost]
@@ -27,26 +29,39 @@ public class AnimalController(IAnimalRepository animalRepository) : ControllerBa
     }
     
     [HttpPut]
-    public void Edit(Animal animal)
+    public IActionResult Edit(Animal animal)
     {
-        animalRepository.Edit(animal);
+        var edited = animalRepository.Edit(animal);
+    
+        return !edited ? NotFound($"Animal with Id {animal.Id} not found.") : Ok();
     }
     
     [HttpDelete]
-    public bool Delete(int id)
+    public IActionResult Delete(int id)
     {
-        return animalRepository.Delete(id);
+        var deleted = animalRepository.Delete(id);
+    
+        return !deleted ? NotFound($"Animal with Id {id} not found.") : Ok();
     }
     
     [HttpGet("{animalId}/visits")]
-    public List<Visit> GetAllVisits(int animalId)
+    public IActionResult GetAllVisits(int animalId)
     {
-        return animalRepository.GetById(animalId).GetAllVisits();
+        var animal = animalRepository.GetById(animalId);
+        return animal == null ? NotFound($"Animal with Id {animalId} not found.") : Ok(animal.GetAllVisits());
     }
     
     [HttpPost("{animalId}/visits")]
-    public void AddVisit(int animalId, Visit visit)
+    public IActionResult AddVisit(int animalId, Visit visit)
     {
-        animalRepository.GetById(animalId).AddVisit(visit);
+        var animal = animalRepository.GetById(animalId);
+        
+        if (animal == null)
+        {
+            return NotFound($"Animal with Id {animalId} not found.");
+        }
+        
+        animal.AddVisit(visit);
+        return Ok();
     }
 }
