@@ -23,9 +23,10 @@ public class AnimalController(IAnimalRepository animalRepository) : ControllerBa
     }
 
     [HttpPost]
-    public void Add(Animal animal)
+    public IActionResult Add(Animal animal)
     {
-        animalRepository.Add(animal);
+        animalRepository.Add(animal); 
+        return CreatedAtAction(nameof(GetById), new { id = animal.Id }, animal);
     }
     
     [HttpPut]
@@ -36,12 +37,17 @@ public class AnimalController(IAnimalRepository animalRepository) : ControllerBa
         return !edited ? NotFound($"Animal with Id {animal.Id} not found.") : Ok();
     }
     
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
         var deleted = animalRepository.Delete(id);
     
-        return !deleted ? NotFound($"Animal with Id {id} not found.") : Ok();
+        if (!deleted)
+        {
+            return NotFound($"Animal with Id {id} not found.");
+        }
+
+        return NoContent();
     }
     
     [HttpGet("{animalId}/visits")]
