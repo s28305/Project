@@ -1,5 +1,7 @@
-namespace Tutorial6;
 using System.Data.SqlClient;
+using Tutorial6.Models;
+
+namespace Tutorial6.Repositories;
 
 public class AnimalRepository(string connectionString): IAnimalRepository
 { 
@@ -98,9 +100,46 @@ public class AnimalRepository(string connectionString): IAnimalRepository
 
         return rowsCount != -1;
     }
-    
-    public bool Edit(Animal animal)
+
+    public bool IdNotExists(int id)
     {
-        throw new NotImplementedException();
+        const string selectString = "SELECT COUNT(*) FROM Animal WHERE Id = @Id";
+        using var connection = new SqlConnection(connectionString);
+        var selectCommand = new SqlCommand(selectString, connection);
+        selectCommand.Parameters.AddWithValue("@Id", id);
+        
+        connection.Open();
+        var count = (int)selectCommand.ExecuteScalar();
+
+        return count == 0;
     }
+    
+    public bool Update(Animal animal)
+    {
+        const string updateString = """
+                                    UPDATE Animal
+                                                                      SET Name = @Name,
+                                                                          Description = @Description,
+                                                                          Category = @Category,
+                                                                          Area = @Area
+                                                                      WHERE Id = @Id
+                                    """;
+        var rowCount = -1;
+    
+        using (var connection = new SqlConnection(connectionString)) 
+        {
+            SqlCommand command = new(updateString, connection);
+            command.Parameters.AddWithValue("@Id", animal.Id);
+            command.Parameters.AddWithValue("@Name", animal.Name);
+            command.Parameters.AddWithValue("@Description", animal.Description);
+            command.Parameters.AddWithValue("@Category", animal.Category);
+            command.Parameters.AddWithValue("@Area", animal.Area);
+
+            connection.Open();
+            rowCount = command.ExecuteNonQuery();
+        }
+
+        return rowCount > 0;
+    }
+
 }
