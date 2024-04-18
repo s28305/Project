@@ -38,12 +38,18 @@ public class AnimalRepository(string connectionString): IAnimalRepository
     
     private static Animal ReaderGetAnimal(SqlDataReader reader)
     {
+        var id = reader.GetInt32(0);
+        var name = reader.GetString(1);
+        var description = reader.IsDBNull(2) ? null! : reader.GetString(2);
+        var category = reader.GetString(3);
+        var area = reader.GetString(4);
+
         return new Animal {
-            Id = reader.GetInt32(0),
-            Name = reader.GetString(1),
-            Description = reader.GetString(2),
-            Category = reader.GetString(3),
-            Area = reader.GetString(4),
+            Id = id,
+            Name = name,
+            Description = description,
+            Category = category,
+            Area = area,
         };
     }
 
@@ -90,7 +96,14 @@ public class AnimalRepository(string connectionString): IAnimalRepository
             SqlCommand command = new(insertString, connection);
             command.Parameters.AddWithValue("Id", animal.Id);
             command.Parameters.AddWithValue("Name", animal.Name);
-            command.Parameters.AddWithValue("Description", animal.Description);
+            if (animal.Description != null)
+            {
+                command.Parameters.AddWithValue("Description", animal.Description);
+            }
+            else
+            {
+                command.Parameters.AddWithValue("Description", DBNull.Value);
+            }
             command.Parameters.AddWithValue("Category", animal.Category);
             command.Parameters.AddWithValue("Area", animal.Area);
 
