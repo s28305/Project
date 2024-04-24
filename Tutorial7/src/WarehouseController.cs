@@ -1,3 +1,5 @@
+using System.Data;
+using System.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Tutorial7;
@@ -30,7 +32,9 @@ public class WarehouseController(IWarehouseService warehouseService) : Controlle
                     return NotFound($"Warehouse with id {productDto.IdWarehouse} does not exist.");
                 }
 
-                return productDto.Amount <= 0 ? BadRequest("Value for amount should be greater than 0.") : UpdateOrder();
+                return productDto.Amount <= 0
+                    ? BadRequest("Value for amount should be greater than 0.")
+                    : UpdateOrder();
             }
             catch (Exception ex)
             {
@@ -57,10 +61,18 @@ public class WarehouseController(IWarehouseService warehouseService) : Controlle
             }
         }
     }
-    
-    [HttpPost("/procedure")]
+
+    [HttpPost("procedure")]
     public IActionResult AddProductToWarehouse([FromBody] ProductDto productDto)
     {
+        try
+        {
+            var newId = warehouseService.AddProductToWarehouse(productDto);
+            return CreatedAtRoute("", new { }, new { Id = newId });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
-}
 }

@@ -1,5 +1,5 @@
 CREATE PROCEDURE AddProductToWarehouse @IdProduct INT, @IdWarehouse INT, @Amount INT,  
-@CreatedAt DATETIME
+@CreatedAt DATETIME, @NewId INT OUTPUT
 AS
 BEGIN  
    
@@ -37,11 +37,10 @@ UPDATE "Order" SET
     FulfilledAt=@CreatedAt
 WHERE IdOrder=@IdOrder;
 
-INSERT INTO Product_Warehouse(IdWarehouse,
-                              IdProduct, IdOrder, Amount, Price, CreatedAt)
+INSERT INTO Product_Warehouse(IdWarehouse, IdProduct, IdOrder, Amount, Price, CreatedAt)
 VALUES(@IdWarehouse, @IdProduct, @IdOrder, @Amount, @Amount*@Price, @CreatedAt);
 
-SELECT @@IDENTITY AS NewId;
+SET @NewId = SCOPE_IDENTITY();
 
 COMMIT;
 END

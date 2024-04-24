@@ -1,8 +1,9 @@
+using System.Data;
 using System.Data.SqlClient;
 
 namespace Tutorial7;
 
-public class WarehouseService(string connectionString): IWarehouseService
+public class WarehouseService(string connectionString) : IWarehouseService
 {
     public bool ProductExists(int id)
     {
@@ -23,7 +24,7 @@ public class WarehouseService(string connectionString): IWarehouseService
         command.Parameters.AddWithValue("@Id", id);
         connection.Open();
         using var reader = command.ExecuteReader();
-        return reader.Read(); 
+        return reader.Read();
     }
 
 
@@ -46,6 +47,7 @@ public class WarehouseService(string connectionString): IWarehouseService
         {
             return orderId;
         }
+
         return null;
     }
 
@@ -53,23 +55,23 @@ public class WarehouseService(string connectionString): IWarehouseService
     {
         using var connection = new SqlConnection(connectionString);
         connection.Open();
-        
+
         const string query = "UPDATE [Order] SET FulfilledAt = @FulfilledAt WHERE IdOrder = @IdOrder";
 
         using var command = new SqlCommand(query, connection);
         command.Parameters.AddWithValue("@IdOrder", orderId);
         command.Parameters.AddWithValue("@FulfilledAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-        
+
         var rowsAffected = command.ExecuteNonQuery();
-        
+
         return rowsAffected > 0;
     }
-    
+
     public int ProductWarehouseUpdate(int idWarehouse, int idProduct, int amount, int idOrder)
     {
         using var connection = new SqlConnection(connectionString);
         connection.Open();
-        
+
         const string query = @"INSERT INTO Product_Warehouse (IdWarehouse, IdProduct, IdOrder, Amount, Price, CreatedAt)
                                                 VALUES (@IdWarehouse, @IdProduct, @IdOrder, @Amount, @Price, @CreatedAt)";
 
@@ -82,11 +84,12 @@ public class WarehouseService(string connectionString): IWarehouseService
             using (var reader = priceCommand.ExecuteReader())
             {
                 if (reader.Read())
-                { 
+                {
                     price = reader.GetDecimal(0);
                 }
             }
         }
+
         var totalPrice = price * amount;
 
         using (var command = new SqlCommand(query, connection))
@@ -97,8 +100,8 @@ public class WarehouseService(string connectionString): IWarehouseService
             command.Parameters.AddWithValue("@Amount", amount);
             command.Parameters.AddWithValue("@Price", totalPrice);
             command.Parameters.AddWithValue("@CreatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-            
-            
+
+
             var rowsAffected = command.ExecuteNonQuery();
 
             if (rowsAffected <= 0) throw new Exception("Failed to insert data.");
@@ -111,7 +114,40 @@ public class WarehouseService(string connectionString): IWarehouseService
 
         }
     }
+
+    public int AddProductToWarehouse(ProductDto productDto)
+    {
+        try
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            
+            using var command = new SqlCommand("AddProductToWarehouse", connection);
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.AddWithValue("@IdProduct", productDto.IdProduct);
+            command.Parameters.AddWithValue("@IdWarehouse", productDto.IdWarehouse);
+            command.Parameters.AddWithValue("@Amount", productDto.Amount);
+            command.Parameters.AddWithValue("@CreatedAt", productDto.CreatedAt);
+            
+            var newIdParameter = new SqlParameter("@NewId", SqlDbType.Int)
+            {
+                Direction = ParameterDirection.Output
+            };
+            
+            command.Parameters.Add(newIdParameter);
+            command.ExecuteNonQuery();
+            var newId = Convert.ToInt32(newIdParameter.Value);
+
+            return newId;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error: {ex.Message}", ex);
+        }
+    }
 }
+
 
 
 

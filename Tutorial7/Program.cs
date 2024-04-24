@@ -10,7 +10,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-ExecuteSqlScript("Scripts/create.sql", "Scripts/drop.sql");
+ExecuteSqlScript("Scripts/create.sql", "Scripts/proc.sql",  "Scripts/drop.sql");
 
 if (app.Environment.IsDevelopment())
 {
@@ -27,18 +27,23 @@ app.MapControllers();
 app.Run();
 return;
 
-void ExecuteSqlScript(string scriptPath, string dropPath)
+void ExecuteSqlScript(string scriptPath1, string scriptPath2, string dropPath)
 {
     try
     {
-        var createScript = File.ReadAllText(scriptPath);
+        var createScript = File.ReadAllText(scriptPath1);
+        var procScript = File.ReadAllText(scriptPath2);
         var dropScript = File.ReadAllText(dropPath);
+        
         using var connection = new SqlConnection(connectionString);
         var command1 = new SqlCommand(dropScript, connection);
         var command = new SqlCommand(createScript, connection);
+        var command2 = new SqlCommand(procScript, connection);
+        
         connection.Open();
         command1.ExecuteNonQuery();
         command.ExecuteNonQuery();
+        command2.ExecuteNonQuery();
     }
     catch (Exception ex)
     {

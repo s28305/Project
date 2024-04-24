@@ -13,3 +13,10 @@ SELECT @tableSql += 'DROP TABLE ' + QUOTENAME(schema_name(schema_id)) + '.' + QU
 FROM sys.tables;
 
 EXEC sp_executesql @tableSql;
+
+DECLARE @procedureSql NVARCHAR(MAX) = '';
+
+SELECT @procedureSql += 'DROP PROCEDURE ' + QUOTENAME(schema_name(schema_id)) + '.' + QUOTENAME(name) + ';' + CHAR(13)
+FROM sys.procedures;
+
+EXEC sp_executesql @procedureSql;
