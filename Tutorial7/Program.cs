@@ -10,7 +10,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-ExecuteSqlScript("Scripts/create.sql", "Scripts/proc.sql",  "Scripts/drop.sql");
+ExecuteSqlScript("src/Scripts/create.sql", "src/Scripts/proc.sql",  "src/Scripts/drop.sql");
 
 if (app.Environment.IsDevelopment())
 {
