@@ -130,14 +130,7 @@ public class WarehouseService(string connectionString) : IWarehouseService
             command.Parameters.AddWithValue("@Amount", productDto.Amount);
             command.Parameters.AddWithValue("@CreatedAt", productDto.CreatedAt);
             
-            var newIdParameter = new SqlParameter("@NewId", SqlDbType.Int)
-            {
-                Direction = ParameterDirection.Output
-            };
-            
-            command.Parameters.Add(newIdParameter);
-            command.ExecuteNonQuery();
-            var newId = Convert.ToInt32(newIdParameter.Value);
+            var newId = Convert.ToInt32(command.ExecuteScalar());
 
             return newId;
         }
