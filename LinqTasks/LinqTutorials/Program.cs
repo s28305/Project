@@ -6,7 +6,7 @@ namespace LinqTutorials
     {
         static void Main(string[] args)
         {
-            var t = LinqTasks.Task7();
+            var t = LinqTasks.Task10();
             foreach (var a in t)
             {
                 Console.WriteLine(a);
