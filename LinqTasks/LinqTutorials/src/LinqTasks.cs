@@ -388,9 +388,9 @@ namespace LinqTutorials
                     Deptno = d.Deptno,
                     Dname = d.Dname,
                     Loc = d.Loc,
-                    Empno = emp != null ? emp.Empno : 0, 
-                    Ename = emp != null ? emp.Ename : null 
-                };;
+                   // Empno = emp != null ? emp.Empno : 0, 
+              //      Ename = emp != null ? emp.Ename : null 
+                };
             //result =
             return x;
         }
