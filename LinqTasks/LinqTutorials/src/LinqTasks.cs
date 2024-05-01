@@ -229,10 +229,9 @@ namespace LinqTutorials
             IEnumerable<object> result = 
                 from e in Emps
                 join d in Depts on e.Deptno equals d.Deptno into edJoin
-                from ed in edJoin.DefaultIfEmpty()
+                from ed in edJoin
                 select new { 
-                    EmpNo = e.Empno, e.Ename, e.HireDate, e.Job, e.Mgr, e.Salary, 
-                    DeptNo = ed?.Deptno, ed?.Dname, ed?.Loc
+                    e.Ename, e.Job, ed?.Dname
                 }; 
 
             return result;
@@ -300,7 +299,7 @@ namespace LinqTutorials
                 .Join(Depts,
                     e => e.Key, 
                     dept => dept.Deptno, 
-                    (e, dept) => new { Name = dept.Dname, NumOfEmployees = e.Count() });
+                    (e, dept) => new { name = dept.Dname, numOfEmployees = e.Count() });
             return result;
         }
 
@@ -356,12 +355,11 @@ namespace LinqTutorials
         ///     HAVING COUNT(*)>2
         ///     ORDER BY COUNT(*) DESC;
         /// </summary>
-        public static IEnumerable<Dept> Task15()
+        public static IEnumerable<object> Task15()
         {
-            IEnumerable<Dept> result = null;
-            var x =
+            IEnumerable<object> result = 
                 from e in Emps
-                where e.Job.Contains('A')
+                where e.Job.Contains('A', StringComparison.CurrentCultureIgnoreCase)
                 group e by e.Job into eJob
                 where eJob.Count() > 2
                 orderby eJob.Count() descending 
@@ -376,23 +374,14 @@ namespace LinqTutorials
         /// <summary>
         ///     SELECT * FROM Emps, Depts;
         /// </summary>
-        public static IEnumerable<Dept> Task16()
+        public static IEnumerable<object> Task16()
         {
-            IEnumerable<Dept> result = null;
-            var x =
+            IEnumerable<object> result = 
                 from d in Depts
-                join e in Emps on d.Deptno equals e.Deptno into empGroup
-                from emp in empGroup.DefaultIfEmpty()
-                select new Dept
-                {
-                    Deptno = d.Deptno,
-                    Dname = d.Dname,
-                    Loc = d.Loc,
-                   // Empno = emp != null ? emp.Empno : 0, 
-              //      Ename = emp != null ? emp.Ename : null 
-                };
-            //result =
-            return x;
+                from e in Emps
+                select new { Emp = e, Dept = d };
+                
+            return result;
         }
     }
 
