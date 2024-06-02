@@ -11,27 +11,38 @@ namespace Tutorial6.Controllers
     public class AnimalController(AnimalContext context) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Animal>>> GetAnimals(string orderBy = "Name")
+        public async Task<ActionResult<IEnumerable<GetAnimalDto>>> GetAnimals(string orderBy = "Name")
         {
             if (!IsValidOrderBy(orderBy.ToLower()))
             {
                 return BadRequest("Incorrect orderBy parameter. " +
-                                  "Possible values include: name, description, category and area.");
+                                  "Possible values include: name, description.");
             }
             
-            var sorted = orderBy.ToLower() switch
+            var animals = await context.Animals.Include(a => a.AnimalType).ToListAsync();
+
+            var sortedAnimals = orderBy.ToLower() switch
             {
-                "description" => context.Animals.OrderBy(a => a.Description),
-                _ => context.Animals.OrderBy(a => a.Name)
+                "description" => animals.OrderBy(a => a.Description).ToList(),
+                _ => animals.OrderBy(a => a.Name).ToList()
             };
-            
-            return await sorted.ToListAsync();
+
+            return sortedAnimals.Select(MapToAnimalDto).ToList();
+        }
+        
+        private static GetAnimalDto MapToAnimalDto(Animal animal)
+        {
+            return new GetAnimalDto
+            {
+                Name = animal.Name,
+                Description = animal.Description,
+                AnimalType = animal.AnimalType.Name
+            };
         }
         
         private static bool IsValidOrderBy(string orderBy)
         {
-            var parameters = new[] { "name", "description" };
-            return parameters.Contains(orderBy);
+            return orderBy is "name" or "description";
         } 
         
         [HttpGet("{id:int}")]
@@ -76,7 +87,7 @@ namespace Tutorial6.Controllers
 
             if (animal == null)
             {
-                return await AddAnimal(animalDto);
+                return NotFound($"Animal with Id {id} was not found.");
             }
             
             var animalType = await context.Animals.FindAsync(animalDto.AnimalTypesId);
