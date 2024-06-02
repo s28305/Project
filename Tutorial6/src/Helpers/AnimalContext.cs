@@ -27,16 +27,15 @@ public class AnimalContext : DbContext
             entity.ToTable("Animal");
 
             entity.Property(e => e.Name)
-                .HasMaxLength(200);
+                .HasMaxLength(100);
             
             entity.Property(e => e.Description)
-                .HasMaxLength(200);
-
-            entity.Property(e => e.Category)
-                .HasMaxLength(200);
-
-            entity.Property(e => e.Area)
-                .HasMaxLength(200);
+                .HasMaxLength(2000);
         });
+        
+        modelBuilder.Entity<Animal>()
+            .Property(a => a.ConcurrencyToken)
+            .IsConcurrencyToken();
     }
+    
 }

@@ -4,6 +4,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AnimalContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DockerServer")));
+builder.Services.AddDbContext<VisitContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DockerServer")));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

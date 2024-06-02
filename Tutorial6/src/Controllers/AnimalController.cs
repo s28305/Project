@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tutorial6.DTO;
 using Tutorial6.Helpers;
 using Tutorial6.Models;
 
@@ -21,8 +22,6 @@ namespace Tutorial6.Controllers
             var sorted = orderBy.ToLower() switch
             {
                 "description" => context.Animals.OrderBy(a => a.Description),
-                "category" => context.Animals.OrderBy(a => a.Category),
-                "area" => context.Animals.OrderBy(a => a.Area),
                 _ => context.Animals.OrderBy(a => a.Name)
             };
             
@@ -31,7 +30,7 @@ namespace Tutorial6.Controllers
         
         private static bool IsValidOrderBy(string orderBy)
         {
-            var parameters = new[] { "name", "description", "category", "area" };
+            var parameters = new[] { "name", "description" };
             return parameters.Contains(orderBy);
         } 
         
@@ -45,8 +44,14 @@ namespace Tutorial6.Controllers
         
         // Animal Id is auto-generated (I changed that so it's more convenient)
         [HttpPost]
-        public async Task<ActionResult<Animal>> AddAnimal(AnimalDTO animalDto)
+        public async Task<ActionResult<Animal>> AddAnimal(AnimalDto animalDto)
         {
+            var animalType = await context.Animals.FindAsync(animalDto.AnimalTypesId);
+            if (animalType == null)
+            {
+                return BadRequest("Animal with given animal type does not exist");
+            }
+            
             var animal = ConvertDtoToAnimal(animalDto);
             context.Animals.Add(animal);
             await context.SaveChangesAsync();
@@ -54,19 +59,18 @@ namespace Tutorial6.Controllers
             return CreatedAtAction("GetAnimal", new { id = animal.Id }, animal);
         }
 
-        private static Animal ConvertDtoToAnimal(AnimalDTO animalDto)
+        private static Animal ConvertDtoToAnimal(AnimalDto animalDto)
         {
             return new Animal
             {
                 Name = animalDto.Name,
                 Description = string.IsNullOrEmpty(animalDto.Description) ? null : animalDto.Description,
-                Category = animalDto.Category,
-                Area = animalDto.Area
+                AnimalTypesId = animalDto.AnimalTypesId
             };
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<Animal>> UpdateAnimal(int id, AnimalDTO animalDto)
+        public async Task<ActionResult<Animal>> UpdateAnimal(int id, AnimalDto animalDto)
         {
             var animal = await context.Animals.FindAsync(id);
 
@@ -74,11 +78,16 @@ namespace Tutorial6.Controllers
             {
                 return await AddAnimal(animalDto);
             }
+            
+            var animalType = await context.Animals.FindAsync(animalDto.AnimalTypesId);
+            if (animalType == null)
+            {
+                return BadRequest("Animal with given animal type does not exist");
+            }
            
             animal.Name = animalDto.Name;
             animal.Description = string.IsNullOrEmpty(animalDto.Description) ? null : animalDto.Description;
-            animal.Category = animalDto.Category;
-            animal.Area = animalDto.Area;
+            animal.AnimalTypesId = animalDto.AnimalTypesId;
 
             context.Entry(animal).State = EntityState.Modified;
 
