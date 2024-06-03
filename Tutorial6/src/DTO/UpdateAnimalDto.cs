@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Tutorial6.DTO;
 
-public class AddAnimalDto
+public class UpdateAnimalDto
 {
     [Required]
     [Length(1, 100)]
@@ -10,7 +10,4 @@ public class AddAnimalDto
 
     [Length(0, 2000)]
     public string? Description { get; set; }
-
-    [Required]
-    public required string AnimalType { get; set; }
 }

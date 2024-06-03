@@ -34,6 +34,7 @@ namespace Tutorial6.Controllers
         {
             return new GetAnimalDto
             {
+                Id = animal.Id,
                 Name = animal.Name,
                 Description = animal.Description,
                 AnimalType = animal.AnimalType.Name
@@ -46,42 +47,56 @@ namespace Tutorial6.Controllers
         } 
         
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Animal>> GetAnimal(int id)
+        public async Task<ActionResult<GetAnimalDto>> GetAnimal(int id)
         {
-            var animal = await context.Animals.FindAsync(id);
+            var animal = await context.Animals
+                .Include(a => a.AnimalType)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
-            return animal == null ? NotFound($"Animal with Id {id} was not found.") : Ok(animal);
+            return animal == null ? NotFound($"Animal with Id {id} was not found.") : MapToAnimalDtoWithoutId(animal);
+        }
+        
+        private static GetAnimalDto MapToAnimalDtoWithoutId(Animal animal)
+        {
+            return new GetAnimalDto
+            {
+                Name = animal.Name,
+                Description = animal.Description,
+                AnimalType = animal.AnimalType.Name
+            };
         }
         
         // Animal Id is auto-generated (I changed that so it's more convenient)
         [HttpPost]
         public async Task<ActionResult<Animal>> AddAnimal(AddAnimalDto addAnimalDto)
         {
-            var animalType = await context.Animals.FindAsync(addAnimalDto.AnimalTypesId);
+           var animalType = await context.AnimalTypes
+                .FirstOrDefaultAsync(at => at.Name.ToLower() == addAnimalDto.AnimalType.ToLower());
+
             if (animalType == null)
             {
                 return BadRequest("Animal with given animal type does not exist");
             }
             
-            var animal = ConvertDtoToAnimal(addAnimalDto);
+            var animal = ConvertDtoToAnimal(addAnimalDto, animalType.Id);
             context.Animals.Add(animal);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAnimal", new { id = animal.Id }, animal);
+            return CreatedAtAction("GetAnimal", new { id = animal.Id }, MapToAnimalDto(animal));
         }
 
-        private static Animal ConvertDtoToAnimal(AddAnimalDto addAnimalDto)
+        private static Animal ConvertDtoToAnimal(AddAnimalDto addAnimalDto, int animalTypeId)
         {
             return new Animal
             {
                 Name = addAnimalDto.Name,
                 Description = string.IsNullOrEmpty(addAnimalDto.Description) ? null : addAnimalDto.Description,
-                AnimalTypesId = addAnimalDto.AnimalTypesId
+                AnimalTypesId = animalTypeId
             };
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<Animal>> UpdateAnimal(int id, AddAnimalDto addAnimalDto)
+        public async Task<ActionResult<Animal>> UpdateAnimal(int id, UpdateAnimalDto updateAnimalDto)
         {
             var animal = await context.Animals.FindAsync(id);
 
@@ -89,20 +104,21 @@ namespace Tutorial6.Controllers
             {
                 return NotFound($"Animal with Id {id} was not found.");
             }
-            
-            var animalType = await context.Animals.FindAsync(addAnimalDto.AnimalTypesId);
-            if (animalType == null)
-            {
-                return BadRequest("Animal with given animal type does not exist");
-            }
            
-            animal.Name = addAnimalDto.Name;
-            animal.Description = string.IsNullOrEmpty(addAnimalDto.Description) ? null : addAnimalDto.Description;
-            animal.AnimalTypesId = addAnimalDto.AnimalTypesId;
+            animal.Name = updateAnimalDto.Name;
+            animal.Description = string.IsNullOrEmpty(updateAnimalDto.Description) ? null : updateAnimalDto.Description;
 
             context.Entry(animal).State = EntityState.Modified;
 
-            await context.SaveChangesAsync();
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict("Animal with given Id is already being modified by another user");
+            }
+            
             return NoContent();
         }
         

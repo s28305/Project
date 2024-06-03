@@ -76,7 +76,7 @@ namespace Tutorial6.Controllers
         // POST: api/Visit
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Visit>> PostVisit([FromBody] AddVisitDto visit)
+        public async Task<ActionResult<GetVisitDto>> PostVisit([FromBody] AddVisitDto visit)
         {
             var emp = await context.Employees.FindAsync(visit.EmployeeId);
             if (emp == null)
@@ -99,7 +99,7 @@ namespace Tutorial6.Controllers
             context.Visits.Add(newVisit);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetVisit", new { id = newVisit.Id }, newVisit);
+            return CreatedAtAction("GetVisit", new { id = newVisit.Id }, MapToVisitDtoWithIds(newVisit));
         }
 
         // DELETE: api/Visit/5
