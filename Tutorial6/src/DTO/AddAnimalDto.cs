@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Tutorial6.DTO;
 
-public class AnimalDto
+public class AddAnimalDto
 {
     [Required]
     [Length(1, 100)]

@@ -20,12 +20,12 @@ namespace Tutorial6.Controllers
                 .OrderBy(v => v.Date)
                 .ToListAsync();
 
-            return visits.Select(MapToVisitDto).ToList();
+            return visits.Select(MapToVisitDtoWithNames).ToList();
         }
 
         // GET: api/Visit/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Visit>> GetVisit(int id)
+        public async Task<ActionResult<GetVisitDto>> GetVisit(int id)
         {
             var visit = await context.Visits
                 .Include(v => v.Employee) 
@@ -34,27 +34,30 @@ namespace Tutorial6.Controllers
 
             if (visit == null)
             {
-                return NotFound();
+                return NotFound($"Visit with Id {id} was not found.");
             }
 
-            return visit;
+            return MapToVisitDtoWithIds(visit);
         }
 
         // PUT: api/Visit/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVisit(int id, AddVisitDto visitDto)
+        public async Task<IActionResult> PutVisit(int id, [FromBody] string newDate)
         {
             if (!VisitExists(id))
             {
-                return NotFound();
+                return NotFound($"Visit with Id {id} was not found.");
+            }
+            
+            if (string.IsNullOrEmpty(newDate) || newDate.Length > 100)
+            {
+                return BadRequest("Date should be provided and cannot exceed length of 100 characters.");
             }
 
             var currentVisit = await context.Visits.FirstAsync(v => v.Id == id);
             
-            currentVisit.EmployeeId = visitDto.EmployeeId;
-            currentVisit.AnimalId = visitDto.AnimalId;
-            currentVisit.Date = visitDto.Date;
+            currentVisit.Date = newDate;
             
             context.Entry(currentVisit).State = EntityState.Modified;
 
@@ -106,7 +109,7 @@ namespace Tutorial6.Controllers
             var visit = await context.Visits.FindAsync(id);
             if (visit == null)
             {
-                return NotFound();
+                return NotFound($"Visit  with Id {id} was not found.");
             }
 
             context.Visits.Remove(visit);
@@ -120,7 +123,7 @@ namespace Tutorial6.Controllers
             return context.Visits.Any(e => e.Id == id);
         }
         
-        private static GetVisitDto MapToVisitDto(Visit visit)
+        private static GetVisitDto MapToVisitDtoWithNames(Visit visit)
         { 
             return new GetVisitDto
             {
@@ -128,6 +131,17 @@ namespace Tutorial6.Controllers
                 Date = visit.Date,
                 EmployeeName = visit.Employee.Name, 
                 AnimalName = visit.Animal.Name   
+            };
+        }
+        
+        private static GetVisitDto MapToVisitDtoWithIds(Visit visit)
+        { 
+            return new GetVisitDto
+            {
+                Id = visit.Id,
+                Date = visit.Date,
+                EmployeeId = visit.Employee.Id, 
+                AnimalId = visit.Animal.Id   
             };
         }
     }

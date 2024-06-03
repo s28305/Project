@@ -55,33 +55,33 @@ namespace Tutorial6.Controllers
         
         // Animal Id is auto-generated (I changed that so it's more convenient)
         [HttpPost]
-        public async Task<ActionResult<Animal>> AddAnimal(AnimalDto animalDto)
+        public async Task<ActionResult<Animal>> AddAnimal(AddAnimalDto addAnimalDto)
         {
-            var animalType = await context.Animals.FindAsync(animalDto.AnimalTypesId);
+            var animalType = await context.Animals.FindAsync(addAnimalDto.AnimalTypesId);
             if (animalType == null)
             {
                 return BadRequest("Animal with given animal type does not exist");
             }
             
-            var animal = ConvertDtoToAnimal(animalDto);
+            var animal = ConvertDtoToAnimal(addAnimalDto);
             context.Animals.Add(animal);
             await context.SaveChangesAsync();
 
             return CreatedAtAction("GetAnimal", new { id = animal.Id }, animal);
         }
 
-        private static Animal ConvertDtoToAnimal(AnimalDto animalDto)
+        private static Animal ConvertDtoToAnimal(AddAnimalDto addAnimalDto)
         {
             return new Animal
             {
-                Name = animalDto.Name,
-                Description = string.IsNullOrEmpty(animalDto.Description) ? null : animalDto.Description,
-                AnimalTypesId = animalDto.AnimalTypesId
+                Name = addAnimalDto.Name,
+                Description = string.IsNullOrEmpty(addAnimalDto.Description) ? null : addAnimalDto.Description,
+                AnimalTypesId = addAnimalDto.AnimalTypesId
             };
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<Animal>> UpdateAnimal(int id, AnimalDto animalDto)
+        public async Task<ActionResult<Animal>> UpdateAnimal(int id, AddAnimalDto addAnimalDto)
         {
             var animal = await context.Animals.FindAsync(id);
 
@@ -90,15 +90,15 @@ namespace Tutorial6.Controllers
                 return NotFound($"Animal with Id {id} was not found.");
             }
             
-            var animalType = await context.Animals.FindAsync(animalDto.AnimalTypesId);
+            var animalType = await context.Animals.FindAsync(addAnimalDto.AnimalTypesId);
             if (animalType == null)
             {
                 return BadRequest("Animal with given animal type does not exist");
             }
            
-            animal.Name = animalDto.Name;
-            animal.Description = string.IsNullOrEmpty(animalDto.Description) ? null : animalDto.Description;
-            animal.AnimalTypesId = animalDto.AnimalTypesId;
+            animal.Name = addAnimalDto.Name;
+            animal.Description = string.IsNullOrEmpty(addAnimalDto.Description) ? null : addAnimalDto.Description;
+            animal.AnimalTypesId = addAnimalDto.AnimalTypesId;
 
             context.Entry(animal).State = EntityState.Modified;
 

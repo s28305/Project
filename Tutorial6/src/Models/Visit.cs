@@ -13,7 +13,7 @@ public class Visit
     public int AnimalId { get; set; }
 
     [Required]
-    [MaxLength(100)]
+    [Length(1, 100)]
     public required string Date { get; set; }
 
     [Timestamp]
