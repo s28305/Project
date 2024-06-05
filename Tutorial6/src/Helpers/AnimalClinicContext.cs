@@ -3,13 +3,13 @@ using Tutorial6.Models;
 
 namespace Tutorial6.Helpers
 {
-    public class AnimalClinicsContext : DbContext
+    public class AnimalClinicContext : DbContext
     {
-        public AnimalClinicsContext()
+        public AnimalClinicContext()
         {
         }
 
-        public AnimalClinicsContext(DbContextOptions<AnimalClinicsContext> options) : base(options)
+        public AnimalClinicContext(DbContextOptions<AnimalClinicContext> options) : base(options)
         {
         }
         

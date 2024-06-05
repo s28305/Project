@@ -8,7 +8,7 @@ namespace Tutorial6.Controllers
 {
     [Route("api/animals")]
     [ApiController]
-    public class AnimalController(AnimalClinicsContext context) : ControllerBase
+    public class AnimalController(AnimalClinicContext context) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetAnimalDto>>> GetAnimals(string orderBy = "Name")

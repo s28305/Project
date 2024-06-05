@@ -8,7 +8,7 @@ namespace Tutorial6.Controllers
 {
     [Route("api/visits")]
     [ApiController]
-    public class VisitController(AnimalClinicsContext context) : ControllerBase
+    public class VisitController(AnimalClinicContext context) : ControllerBase
     {
         // GET: api/Visit
         [HttpGet]

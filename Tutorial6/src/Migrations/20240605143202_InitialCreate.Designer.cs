@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tutorial6.Helpers;
 
@@ -9,10 +10,12 @@ using Tutorial6.Helpers;
 
 namespace Tutorial6.Migrations
 {
-    [DbContext(typeof(AnimalClinicsContext))]
-    partial class AnimalClinicsContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(AnimalClinicContext))]
+    [Migration("20240605143202_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
