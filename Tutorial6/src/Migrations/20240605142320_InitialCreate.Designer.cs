@@ -10,9 +10,9 @@ using Tutorial6.Helpers;
 
 namespace Tutorial6.Migrations
 {
-    [DbContext(typeof(VisitContext))]
-    [Migration("20240602200001_VisitMigration")]
-    partial class VisitMigration
+    [DbContext(typeof(AnimalClinicsContext))]
+    [Migration("20240605142320_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,13 +32,8 @@ namespace Tutorial6.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Area")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AnimalTypesId")
+                        .HasColumnType("int");
 
                     b.Property<byte[]>("ConcurrencyToken")
                         .IsConcurrencyToken()
@@ -47,15 +42,19 @@ namespace Tutorial6.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Animal");
+                    b.HasIndex("AnimalTypesId");
+
+                    b.ToTable("Animal", (string)null);
                 });
 
             modelBuilder.Entity("Tutorial6.Models.AnimalTypes", b =>
@@ -66,21 +65,12 @@ namespace Tutorial6.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<byte[]>("ConcurrencyToken")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("AnimalTypes", (string)null);
                 });
@@ -92,12 +82,6 @@ namespace Tutorial6.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<byte[]>("ConcurrencyToken")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -141,8 +125,7 @@ namespace Tutorial6.Migrations
 
                     b.Property<string>("Date")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
@@ -156,18 +139,29 @@ namespace Tutorial6.Migrations
                     b.ToTable("Visit", (string)null);
                 });
 
+            modelBuilder.Entity("Tutorial6.Models.Animal", b =>
+                {
+                    b.HasOne("Tutorial6.Models.AnimalTypes", "AnimalType")
+                        .WithMany()
+                        .HasForeignKey("AnimalTypesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AnimalType");
+                });
+
             modelBuilder.Entity("Tutorial6.Models.Visit", b =>
                 {
                     b.HasOne("Tutorial6.Models.Animal", "Animal")
                         .WithMany()
                         .HasForeignKey("AnimalId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Tutorial6.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Animal");

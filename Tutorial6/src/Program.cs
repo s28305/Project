@@ -2,9 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Tutorial6.Helpers;
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AnimalContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DockerServer")));
-builder.Services.AddDbContext<VisitContext>(options =>
+builder.Services.AddDbContext<AnimalClinicsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DockerServer")));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

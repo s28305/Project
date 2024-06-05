@@ -8,7 +8,7 @@ namespace Tutorial6.Controllers
 {
     [Route("api/animals")]
     [ApiController]
-    public class AnimalController(AnimalContext context) : ControllerBase
+    public class AnimalController(AnimalClinicsContext context) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetAnimalDto>>> GetAnimals(string orderBy = "Name")
@@ -66,7 +66,6 @@ namespace Tutorial6.Controllers
             };
         }
         
-        // Animal Id is auto-generated (I changed that so it's more convenient)
         [HttpPost]
         public async Task<ActionResult<Animal>> AddAnimal(AddAnimalDto addAnimalDto)
         {
@@ -123,7 +122,6 @@ namespace Tutorial6.Controllers
         }
         
         
-        // I decided to add delete endpoint as you accidentally skipped that part in the description :)
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteAnimal(int id)
         {
