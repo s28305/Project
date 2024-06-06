@@ -13,21 +13,29 @@ namespace Tutorial6.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetAnimalDto>>> GetAnimals(string orderBy = "Name")
         {
-            if (!IsValidOrderBy(orderBy.ToLower()))
+            try
             {
-                return BadRequest("Incorrect orderBy parameter. " +
-                                  "Possible values include: name, description.");
+                if (!IsValidOrderBy(orderBy.ToLower()))
+                {
+                    return BadRequest("Incorrect orderBy parameter. " +
+                                      "Possible values include: name, description.");
+                }
+
+                var animals = await context.Animals.Include(a => a.AnimalType).ToListAsync();
+
+                var sortedAnimals = orderBy.ToLower() switch
+                {
+                    "description" => animals.OrderBy(a => a.Description).ToList(),
+                    _ => animals.OrderBy(a => a.Name).ToList()
+                };
+
+                return sortedAnimals.Select(MapToAnimalDto).ToList();
             }
-            
-            var animals = await context.Animals.Include(a => a.AnimalType).ToListAsync();
-
-            var sortedAnimals = orderBy.ToLower() switch
+            catch (Exception e)
             {
-                "description" => animals.OrderBy(a => a.Description).ToList(),
-                _ => animals.OrderBy(a => a.Name).ToList()
-            };
-
-            return sortedAnimals.Select(MapToAnimalDto).ToList();
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { message = "Error occurred while getting animals.", details = e.Message });
+            }
         }
         
         private static GetAnimalDto MapToAnimalDto(Animal animal)
@@ -49,11 +57,21 @@ namespace Tutorial6.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GetAnimalDto>> GetAnimal(int id)
         {
-            var animal = await context.Animals
-                .Include(a => a.AnimalType)
-                .FirstOrDefaultAsync(a => a.Id == id);
+            try
+            {
+                var animal = await context.Animals
+                    .Include(a => a.AnimalType)
+                    .FirstOrDefaultAsync(a => a.Id == id);
 
-            return animal == null ? NotFound($"Animal with Id {id} was not found.") : MapToAnimalDtoWithoutId(animal);
+                return animal == null
+                    ? NotFound($"Animal with Id {id} was not found.")
+                    : MapToAnimalDtoWithoutId(animal);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { message = "Error occurred while getting animal.", details = e.Message });
+            }
         }
         
         private static GetAnimalDto MapToAnimalDtoWithoutId(Animal animal)
@@ -69,19 +87,27 @@ namespace Tutorial6.Controllers
         [HttpPost]
         public async Task<ActionResult<Animal>> AddAnimal(AddAnimalDto addAnimalDto)
         {
-           var animalType = await context.AnimalTypes
-                .FirstOrDefaultAsync(at => at.Name.ToLower() == addAnimalDto.AnimalType.ToLower());
-
-            if (animalType == null)
+            try
             {
-                return BadRequest("Animal with given animal type does not exist");
-            }
-            
-            var animal = ConvertDtoToAnimal(addAnimalDto, animalType.Id);
-            context.Animals.Add(animal);
-            await context.SaveChangesAsync();
+                var animalType = await context.AnimalTypes
+                    .FirstOrDefaultAsync(at => at.Name.ToLower() == addAnimalDto.AnimalType.ToLower());
 
-            return CreatedAtAction("GetAnimal", new { id = animal.Id }, MapToAnimalDto(animal));
+                if (animalType == null)
+                {
+                    return BadRequest("Animal with given animal type does not exist");
+                }
+
+                var animal = ConvertDtoToAnimal(addAnimalDto, animalType.Id);
+                context.Animals.Add(animal);
+                await context.SaveChangesAsync();
+
+                return CreatedAtAction("GetAnimal", new { id = animal.Id }, MapToAnimalDto(animal));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { message = "Error occurred while adding animal.", details = e.Message });
+            }
         }
 
         private static Animal ConvertDtoToAnimal(AddAnimalDto addAnimalDto, int animalTypeId)
@@ -97,45 +123,63 @@ namespace Tutorial6.Controllers
         [HttpPut("{id:int}")]
         public async Task<ActionResult<Animal>> UpdateAnimal(int id, UpdateAnimalDto updateAnimalDto)
         {
-            var animal = await context.Animals.FindAsync(id);
-
-            if (animal == null)
-            {
-                return NotFound($"Animal with Id {id} was not found.");
-            }
-           
-            animal.Name = updateAnimalDto.Name;
-            animal.Description = string.IsNullOrEmpty(updateAnimalDto.Description) ? null : updateAnimalDto.Description;
-
-            context.Entry(animal).State = EntityState.Modified;
-
             try
             {
-                await context.SaveChangesAsync();
+                var animal = await context.Animals.FindAsync(id);
+
+                if (animal == null)
+                {
+                    return NotFound($"Animal with Id {id} was not found.");
+                }
+
+                animal.Name = updateAnimalDto.Name;
+                animal.Description = string.IsNullOrEmpty(updateAnimalDto.Description)
+                    ? null
+                    : updateAnimalDto.Description;
+
+                context.Entry(animal).State = EntityState.Modified;
+
+                try
+                {
+                    await context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return Conflict("Animal with given Id is already being modified by another user");
+                }
+
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                return Conflict("Animal with given Id is already being modified by another user");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { message = "Error occurred while updating animal.", details = e.Message });
             }
-            
-            return NoContent();
         }
         
         
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteAnimal(int id)
         {
-            var animal = await context.Animals.FindAsync(id);
-            
-            if (animal == null)
+            try
             {
-                return NotFound($"Animal with Id {id} was not found.");
+                var animal = await context.Animals.FindAsync(id);
+
+                if (animal == null)
+                {
+                    return NotFound($"Animal with Id {id} was not found.");
+                }
+
+                context.Animals.Remove(animal);
+                await context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            context.Animals.Remove(animal);
-            await context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { message = "Error occurred while deleting animal.", details = e.Message });
+            }
         }
     }
 }
