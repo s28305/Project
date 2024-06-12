@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tutorial6.DTO;
@@ -7,6 +8,7 @@ using Tutorial6.Models;
 namespace Tutorial6.Controllers
 {
     [Route("api/animals")]
+    [Authorize]
     [ApiController]
     public class AnimalController(AnimalClinicContext context) : ControllerBase
     {
@@ -159,6 +161,7 @@ namespace Tutorial6.Controllers
         
         
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAnimal(int id)
         {
             try

@@ -18,6 +18,10 @@ namespace Tutorial6.Helpers
         public virtual required DbSet<Employee> Employees { get; set; }
         public virtual required DbSet<Visit> Visits { get; set; }
 
+        public DbSet<UserType> UserTypes { get; set; }
+
+        public DbSet<User> Users { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Animal>(entity =>
@@ -96,6 +100,30 @@ namespace Tutorial6.Helpers
 
                 entity.Property(v => v.ConcurrencyToken)
                     .IsConcurrencyToken();
+            });
+            
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("User");
+                entity.HasKey(u => u.Id).HasName("User_PK");
+                entity.HasIndex(u => u.Username).IsUnique();
+
+                entity.Property(u => u.Username).HasMaxLength(30);
+                entity.Property(u => u.Password).HasMaxLength(256);
+
+                entity.HasOne(u => u.Type)
+                    .WithMany()
+                    .HasForeignKey(u => u.TypeId)
+                    .IsRequired();
+            });
+            
+            modelBuilder.Entity<UserType>(entity =>
+            {
+                entity.ToTable("UserType");
+                entity.HasKey(r => r.Id).HasName("UserType_PK");
+                entity.HasIndex(r => r.Name).IsUnique();
+
+                entity.Property(r => r.Name).HasMaxLength(50);
             });
         }
     }

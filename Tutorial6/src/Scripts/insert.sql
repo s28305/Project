@@ -25,3 +25,6 @@ Insert into Visit(EmployeeId, AnimalId, Date)
 Values
 (1,1, '2024-06-16T13:00:00'),
 (2,4, '2024-06-16T13:00:00');
+
+Insert into UserType(Name)
+Values ('User')

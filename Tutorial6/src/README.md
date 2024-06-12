@@ -1,12 +1,13 @@
 # Animal clinic system
 This is a management system for an animal clinic that allows you to manage animals and visits.
 ### Project structure
-- Controllers: contains API controller.
+- Controllers: contains API controllers.
 - DTO: contains DTOs, needed for passing data.
 - Helpers: contains DBContext file.
 - Migrations: contains auto-generated migration files.
-- Models: contains data models for Animal, AnimalTypes, Employee and Visit.
+- Models: contains data models for Animal, AnimalTypes, User, UserType, Employee and Visit.
 - Scripts: contains file with sample data for insertion.
+- Services: contains authentication services.
 ### Features
 Actions possible for both animals and visits:
 - Get all,
@@ -14,8 +15,13 @@ Actions possible for both animals and visits:
 - Update,
 - Add,
 - Delete.
+Actions possible for users:
+- Login,
+- Register,
+- Refresh token.
 ### Dependencies
 - Microsoft.EntityFrameworkCore.SqlServer
+- Microsoft.AspNetCore.Authorization;
 - .NET 8.0 SDK
 - - Swagger
 - Dockerized MsSql database

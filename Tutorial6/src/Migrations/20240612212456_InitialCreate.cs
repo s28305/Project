@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -39,6 +40,19 @@ namespace Tutorial6.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserType",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("UserType_PK", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Animal",
                 columns: table => new
                 {
@@ -58,6 +72,29 @@ namespace Tutorial6.Migrations
                         principalTable: "AnimalTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "User",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Username = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshTokenExpire = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TypeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("User_PK", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_User_UserType_TypeId",
+                        column: x => x.TypeId,
+                        principalTable: "UserType",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -100,6 +137,23 @@ namespace Tutorial6.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_User_TypeId",
+                table: "User",
+                column: "TypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_Username",
+                table: "User",
+                column: "Username",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserType_Name",
+                table: "UserType",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Visit_AnimalId",
                 table: "Visit",
                 column: "AnimalId");
@@ -114,7 +168,13 @@ namespace Tutorial6.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "User");
+
+            migrationBuilder.DropTable(
                 name: "Visit");
+
+            migrationBuilder.DropTable(
+                name: "UserType");
 
             migrationBuilder.DropTable(
                 name: "Animal");
