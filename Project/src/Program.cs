@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using Project.Clients.Helpers;
+using Project.Helpers;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ClientContext>(options =>
+builder.Services.AddDbContext<RevenueContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DockerServer")));
 
 builder.Services.AddControllers();
