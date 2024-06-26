@@ -12,7 +12,7 @@ public class AddContractDto
     [Required(ErrorMessage = "End date is required.")]
     public DateTime EndDate { get; set; }
     
-    [Range(1, 3, ErrorMessage = "Support years must be between 1 and 3.")]
+    [Range(0, 3, ErrorMessage = "Support years must be between 1 and 3.")]
     public int SupportYears { get; set; }
     
     [Required(ErrorMessage = "Software system id is required.")]
@@ -20,6 +20,9 @@ public class AddContractDto
     
     [Required(ErrorMessage = "Software system version is required.")]
     public required string SoftwareVersion { get; set; }
+    
+    [Required(ErrorMessage = "Client id is required.")]
+    public int ClientId { get; set; }
 
     public Contract Map(double upfrontCost)
     {
@@ -30,7 +33,8 @@ public class AddContractDto
             Price = upfrontCost,
             SupportYears = SupportYears,
             SoftwareSystemId = SoftwareSystemId,
-            SoftwareVersion = SoftwareVersion
+            SoftwareVersion = SoftwareVersion,
+            ClientId = ClientId
         };
     }
 }

@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Project.Clients.DTOs;
+using Project.Clients.Models;
 using Project.Helpers;
 
 namespace Project.Clients.Controllers
@@ -10,6 +12,7 @@ namespace Project.Clients.Controllers
     public class ClientController(RevenueContext context) : ControllerBase
     {
         // PUT: api/clients/companies
+        [Authorize(Roles = "Admin")]
         [HttpPut("companies")]
         public async Task<IActionResult> PutCompany(PutCompanyDto updatedCompany, CancellationToken cancellationToken)
         {
@@ -41,17 +44,19 @@ namespace Project.Clients.Controllers
 
 
         // POST: api/clients/companies
+        [Authorize]
         [HttpPost("companies")]
-        public async Task<ActionResult<AddCompanyDto>> PostCompany(AddCompanyDto companyDto)
+        public async Task<ActionResult<(int, AddCompanyDto)>> PostCompany(AddCompanyDto companyDto)
         {
             var company = companyDto.Map();
             context.Companies.Add(company);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("", new { id = company.Id }, companyDto);
+            return Created("", new { company.Id, Company = companyDto });
         }
 
         // PUT: api/clients/individuals
+        [Authorize(Roles = "Admin")]
         [HttpPut("individuals")]
         public async Task<IActionResult> PutIndividual(PutIndividualDto updatedIndividual, CancellationToken cancellationToken)
         {
@@ -82,17 +87,19 @@ namespace Project.Clients.Controllers
         }
 
         // POST: api/clients/individuals
+        [Authorize]
         [HttpPost("individuals")]
-        public async Task<ActionResult<AddIndividualDto>> PostIndividual(AddIndividualDto individualDto)
+        public async Task<ActionResult<(int, AddIndividualDto)>> PostIndividual(AddIndividualDto individualDto)
         {
             var individual = individualDto.Map();
             context.Individuals.Add(individual);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("", new { id = individual.Id }, individualDto);
+            return Created("", new { individual.Id, Individual = individualDto });
         }
 
         // DELETE: api/clients/individuals/5
+        [Authorize(Roles = "Admin")]
         [HttpDelete("individuals/{id:int}")]
         public async Task<IActionResult> DeleteIndividual(int id)
         {

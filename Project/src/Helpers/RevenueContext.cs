@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Project.Authentication.Models;
 using Project.Clients.Models;
 using Project.SoftwareSystems.Models;
 
@@ -6,12 +7,16 @@ namespace Project.Helpers
 {
     public class RevenueContext(DbContextOptions<RevenueContext> options) : DbContext(options)
     {
-        public DbSet<Individual> Individuals { get; set; }
-        public DbSet<Company> Companies { get; set; }
-        public DbSet<SoftwareSystem> SoftwareSystems { get; set; }
-        public DbSet<Contract> Contracts { get; set; }
-        public DbSet<Discount> Discounts { get; set; }
-        public DbSet<Payment> Payments { get; set; }
+        public virtual required DbSet<Individual> Individuals { get; set; }
+        public virtual required DbSet<Company> Companies { get; set; }
+        public virtual required DbSet<SoftwareSystem> SoftwareSystems { get; set; }
+        public virtual required DbSet<Contract> Contracts { get; set; }
+        public virtual required DbSet<Discount> Discounts { get; set; }
+        public virtual required DbSet<Payment> Payments { get; set; }
+        
+        public virtual required DbSet<Role> Roles { get; set; }
+
+        public virtual required DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -146,7 +151,32 @@ namespace Project.Helpers
                 entity.HasOne(p => p.Contract)
                     .WithMany(c => c.Payments)
                     .HasForeignKey(p => p.ContractId);
+                
+                entity.Property(e => e.ConcurrencyToken)
+                    .IsConcurrencyToken();
+            });
+            
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("Users");
+                entity.HasKey(u => u.Id);
+                entity.HasIndex(u => u.Username).IsUnique();
 
+                entity.Property(u => u.Username).HasMaxLength(30);
+                entity.Property(u => u.Password).HasMaxLength(256);
+
+                entity.HasOne(u => u.Role)
+                    .WithMany()
+                    .HasForeignKey(u => u.RoleId)
+                    .IsRequired();
+            });
+            
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.ToTable("Roles");
+                entity.HasKey(r => r.Id);
+                entity.HasIndex(r => r.Name).IsUnique();
+                entity.Property(r => r.Name).HasMaxLength(50);
             });
         }
     }

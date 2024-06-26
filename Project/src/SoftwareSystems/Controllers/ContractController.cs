@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Project.SoftwareSystems.Models;
 
 using Microsoft.AspNetCore.Mvc;
@@ -12,22 +13,35 @@ namespace Project.SoftwareSystems.Controllers;
 public class ContractController(RevenueContext context) : ControllerBase
 {
     // POST: api/contracts
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<Contract>> CreateContract(AddContractDto contractDto)
     {
         var softwareSystem = await context.SoftwareSystems
-            .FirstOrDefaultAsync(s => s.Id == contractDto.SoftwareSystemId);
+            .FirstOrDefaultAsync(s => s.Id == contractDto.SoftwareSystemId && s.Version == contractDto.SoftwareVersion);
 
         if (softwareSystem == null)
         {
             return NotFound("Software system not found.");
         }
+        
+        var individualClient = await context.Individuals
+            .FirstOrDefaultAsync(i => i.Id == contractDto.ClientId);
+
+        var companyClient = await context.Companies
+            .FirstOrDefaultAsync(c => c.Id == contractDto.ClientId);
+
+        if (individualClient == null && companyClient == null)
+        {
+            return NotFound("Client not found.");
+        }
+        
         if (!ValidDuration(contractDto.StartDate, contractDto.EndDate))
         {
             return BadRequest("Contract duration must be between 3 and 30 days.");
         }
 
-        if (await HasActiveContract(contractDto.SoftwareSystemId))
+        if (await HasActiveContract(contractDto.SoftwareSystemId, contractDto.ClientId))
         {
             return BadRequest("Client already has an active contract for the software system.");
         }
@@ -39,7 +53,7 @@ public class ContractController(RevenueContext context) : ControllerBase
         context.Contracts.Add(contract);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction("", new { id = contract.Id }, contract);
+        return Created("", new { contract.Id, Contract = contractDto, contract.Price });
     }
 
     private static bool ValidDuration(DateTime startDate, DateTime endDate)
@@ -48,11 +62,15 @@ public class ContractController(RevenueContext context) : ControllerBase
         return contractDuration is >= 3 and <= 30 && startDate < endDate;
     }
 
-    private async Task<bool> HasActiveContract(int softwareId)
+    private async Task<bool> HasActiveContract(int softwareSystemId, int clientId)
     {
         return await context.Contracts
-            .AnyAsync(c => c.SoftwareSystemId == softwareId && c.IsSigned && !c.IsCancelled);
+            .AnyAsync(c => c.SoftwareSystemId == softwareSystemId 
+                           && c.ClientId == clientId 
+                           && c.IsSigned 
+                           && !c.IsCancelled);
     }
+
 
     private double GetTotalPrice(Contract contract)
     {
@@ -94,25 +112,31 @@ public class ContractController(RevenueContext context) : ControllerBase
     }
 
 
-    // POST: api/contracts/payments/{id}
-    [HttpPost("payments/{id}")]
-    public async Task<ActionResult<Payment>> IssuePayment(int id, Payment payment)
+    // POST: api/contracts/payments
+    [Authorize]
+    [HttpPost("payments")]
+    public async Task<ActionResult<Payment>> IssuePayment(AddPaymentDto paymentDto)
     {
         var contract = await context.Contracts
             .Include(c => c.Payments) 
-            .FirstOrDefaultAsync(c => c.Id == id);
+            .FirstOrDefaultAsync(c => c.Id == paymentDto.ContractId);
         
         if (contract == null)
         {
-            return NotFound($"Contract with id {id} was not found.");
+            return NotFound($"Contract with id {paymentDto.ContractId} was not found.");
         }
 
         if (contract.IsCancelled)
         {
             return BadRequest("Contract was cancelled.");
         }
+        
+        if (contract.IsSigned)
+        {
+            return BadRequest("Contract was already signed.");
+        }
 
-        if (contract.IsSigned && DateTime.UtcNow > contract.EndDate)
+        if (DateTime.UtcNow > contract.EndDate)
         { 
             contract.Cancel();
             return BadRequest("Contract payment period has expired.");
@@ -120,57 +144,32 @@ public class ContractController(RevenueContext context) : ControllerBase
         
         var remainingPrice = contract.Price - contract.Payments.Sum(p => p.Amount);
 
-        if (payment.Amount <= 0 || payment.Amount > remainingPrice)
+        if (paymentDto.Amount <= 0 || paymentDto.Amount > remainingPrice)
         {
             return BadRequest($"Payment amount should be between 0 and {remainingPrice}.");
         }
 
-        payment.Map(id);
-        context.Payments.Add(payment);
+        var payment = paymentDto.Map();
+        context.Payments.Add(payment); 
+        contract.Payments.Add(payment);
         await context.SaveChangesAsync();
-        
-        if (contract.Price < contract.Payments.Sum(p => p.Amount))
-            return CreatedAtAction("", new { id = payment.Id }, payment);
-        
+
+        if (!(contract.Price <= contract.Payments.Sum(p => p.Amount)))
+            return Created("", new
+            {
+                id = payment.Id,
+                Payment = paymentDto
+            });
         contract.IsSigned = true;
         context.Entry(contract).State = EntityState.Modified;
         await context.SaveChangesAsync();
-        
-        return CreatedAtAction("", new { id = payment.Id }, new
-        { 
-            Payment = payment,
+
+        return Created("", new
+        {
+            id = payment.Id,
+            Payment = paymentDto,
             Message = "Contract was fully paid."
         });
+
     }
-    
-    ///////////////////////////////////
-    
-    // GET: api/contracts/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Contract>> GetContract(int id)
-    {
-        var contract = await context.Contracts.FindAsync(id);
-
-        if (contract == null)
-        {
-            return NotFound($"Contract with id {id} not found.");
-        }
-
-        return contract;
-    }
-
-    // GET: api/contracts/{id}/payments
-    [HttpGet("{id}/payments")]
-    public async Task<ActionResult<IEnumerable<Payment>>> GetPaymentsForContract(int id)
-    {
-        var contract = await context.Contracts.FindAsync(id);
-
-        if (contract == null)
-        {
-            return NotFound($"Contract with id {id} not found.");
-        }
-
-        return contract.Payments.ToList();
-    }
-
 }

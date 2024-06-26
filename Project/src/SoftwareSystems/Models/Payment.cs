@@ -13,10 +13,4 @@ public class Payment
     
     [Timestamp]
     public byte[] ConcurrencyToken { get; set; }
-
-    public void Map(int id)
-    {
-        PaymentDate = DateTime.UtcNow;
-        ContractId = id;
-    }
 }
