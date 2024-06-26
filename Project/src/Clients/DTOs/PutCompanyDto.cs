@@ -26,14 +26,11 @@ public class PutCompanyDto
     [StringLength(10, ErrorMessage = "Phone number must not exceed 10 characters.")]
     public required string PhoneNumber { get; set; }
 
-    public Company Map()
+    public void Map(Company company)
     {
-        return new Company
-        {
-            CompanyName = CompanyName,
-            Address = Address,
-            Email = Email,
-            PhoneNumber = PhoneNumber
-        };
+        company.CompanyName = CompanyName;
+        company.Address = Address;
+        company.Email = Email;
+        company.PhoneNumber = PhoneNumber;
     }
 }

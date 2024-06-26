@@ -36,15 +36,15 @@ namespace Project.Clients.Controllers
         [HttpPut("companies")]
         public async Task<IActionResult> PutCompany(PutCompanyDto updatedCompany, CancellationToken cancellationToken)
         {
-            var company = await context.Companies.FindAsync(new object?[] { updatedCompany.Id }, cancellationToken: cancellationToken);
-
-            if (company == null)
+            var existingCompany = await context.Companies.FindAsync([updatedCompany.Id], cancellationToken: cancellationToken);
+            
+            if (existingCompany == null)
             {
-                return BadRequest($"Company with Id {updatedCompany.Id} was not found.");
+                return NotFound($"Company with Id {updatedCompany.Id} was not found.");
             }
-
-            company = updatedCompany.Map();
-            context.Entry(company).State = EntityState.Modified;
+            
+            updatedCompany.Map(existingCompany);
+            context.Entry(existingCompany).State = EntityState.Modified;
 
             try
             {
@@ -62,6 +62,7 @@ namespace Project.Clients.Controllers
             return NoContent();
         }
 
+
         // POST: api/clients/companies
         [HttpPost("companies")]
         public async Task<ActionResult<Company>> PostCompany(AddCompanyDto companyDto)
@@ -70,12 +71,12 @@ namespace Project.Clients.Controllers
             context.Companies.Add(company);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCompany", new { id = company.Id }, companyDto);
+            return CreatedAtAction("", new { id = company.Id }, companyDto);
         }
 
         // GET: api/clients/individuals
         [HttpGet("individuals")]
-        public async Task<ActionResult<IEnumerable<Individual>>> GetIndividualClients()
+        public async Task<ActionResult<IEnumerable<Individual>>> GetIndividuals()
         {
             var individuals = await context.Individuals.ToListAsync();
             return individuals;
@@ -83,7 +84,7 @@ namespace Project.Clients.Controllers
 
         // GET: api/clients/individuals/5
         [HttpGet("individuals/{id:int}")]
-        public async Task<ActionResult<Individual>> GetIndividualClient(int id)
+        public async Task<ActionResult<Individual>> GetIndividual(int id)
         {
             var individual = await context.Individuals.FindAsync(id);
 
@@ -97,7 +98,7 @@ namespace Project.Clients.Controllers
 
         // PUT: api/clients/individuals
         [HttpPut("individuals")]
-        public async Task<IActionResult> PutIndividualClient(PutIndividualDto updatedIndividual, CancellationToken cancellationToken)
+        public async Task<IActionResult> PutIndividual(PutIndividualDto updatedIndividual, CancellationToken cancellationToken)
         {
             var individual = await context.Individuals.FindAsync(new object?[] { updatedIndividual.Id }, cancellationToken: cancellationToken);
 
@@ -106,7 +107,7 @@ namespace Project.Clients.Controllers
                 return BadRequest($"Individual client with Id {updatedIndividual.Id} was not found.");
             }
 
-            individual = updatedIndividual.Map();
+            updatedIndividual.Map(individual);
             context.Entry(individual).State = EntityState.Modified;
 
             try
@@ -115,7 +116,7 @@ namespace Project.Clients.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!IndividualClientExists(updatedIndividual.Id))
+                if (!IndividualExists(updatedIndividual.Id))
                 {
                     return NotFound();
                 }
@@ -127,18 +128,18 @@ namespace Project.Clients.Controllers
 
         // POST: api/clients/individuals
         [HttpPost("individuals")]
-        public async Task<ActionResult<Individual>> PostIndividualClient(AddIndividualDto individualDto)
+        public async Task<ActionResult<Individual>> PostIndividual(AddIndividualDto individualDto)
         {
             var individual = individualDto.Map();
             context.Individuals.Add(individual);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetIndividualClient", new { id = individual.Id }, individualDto);
+            return CreatedAtAction("", new { id = individual.Id }, individualDto);
         }
 
         // DELETE: api/clients/individuals/5
         [HttpDelete("individuals/{id:int}")]
-        public async Task<IActionResult> DeleteIndividualClient(int id)
+        public async Task<IActionResult> DeleteIndividual(int id)
         {
             var individual = await context.Individuals.FindAsync(id);
             if (individual == null)
@@ -157,7 +158,7 @@ namespace Project.Clients.Controllers
             return context.Companies.Any(e => e.Id == id);
         }
 
-        private bool IndividualClientExists(int id)
+        private bool IndividualExists(int id)
         {
             return context.Individuals.Any(e => e.Id == id);
         }

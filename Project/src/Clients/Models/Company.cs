@@ -4,7 +4,7 @@ namespace Project.Clients.Models;
 
 public class Company
     {
-        public int Id { get; set; }
+        public int Id { get; init; }
 
        // [Required(ErrorMessage = "Company name is required.")]
       //  [StringLength(50, MinimumLength = 1, ErrorMessage = "Company name must be between 1 and 50 characters.")]
@@ -25,5 +25,5 @@ public class Company
 
       //  [Required(ErrorMessage = "KRS is required.")]
       //  [StringLength(14, MinimumLength = 9, ErrorMessage = "KRS must be between 9 and 14 characters.")]
-        public string Krs { get; set; }
+        public string? Krs { get; set; }
     }

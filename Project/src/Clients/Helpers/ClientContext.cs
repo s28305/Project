@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Project.Clients.Models;
+using Project.SoftwareSystems.Models;
 
 namespace Project.Clients.Helpers;
 
@@ -7,6 +8,13 @@ public class ClientContext(DbContextOptions<ClientContext> options) : DbContext(
 {
     public virtual required DbSet<Individual> Individuals { get; set; }
     public virtual required DbSet<Company> Companies { get; set; }
+    public virtual required DbSet<SoftwareSystem> SoftwareSystems { get; set; }
+    
+    public virtual required DbSet<Contract> Contracts { get; set; }
+    
+    public virtual required DbSet<Discount> DbSet { get; set; }
+    
+    public virtual required DbSet<Payment> Payments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -66,6 +74,38 @@ public class ClientContext(DbContextOptions<ClientContext> options) : DbContext(
                 .IsRequired()
                 .HasMaxLength(14);
         });
+
+        modelBuilder.Entity<SoftwareSystem>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("SoftwareSystem");
+            
+            entity.Property(a => a.ConcurrencyToken)
+                .IsConcurrencyToken();
+        });
+        
+        modelBuilder.Entity<Contract>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Contract");
+        });
+        
+        modelBuilder.Entity<Discount>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Discount");
+        });
+        
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Payment");
+        });
+        
     }
 
 }
