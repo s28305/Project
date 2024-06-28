@@ -12,9 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 builder.Services.AddScoped<IRevenueService, RevenueService>();
+builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
 builder.Services.AddDbContext<RevenueContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DockerServer")));
-builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
 
 builder.Services.AddAuthentication(a =>
     {
@@ -73,8 +73,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+        //options.RoutePrefix = string.Empty;
+    });
 }
+
 
 app.UseHttpsRedirection();
 app.UseRouting();

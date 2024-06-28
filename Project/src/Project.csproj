@@ -13,6 +13,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.6" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
@@ -21,11 +22,26 @@
         </PackageReference>
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+        <PackageReference Include="xunit" Version="2.8.1" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Clients\Controllers\" />
       <Folder Include="Migrations\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="TestProject\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="TestProject\obj\TestProject.csproj.nuget.dgspec.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="TestProject\Tests.cs">
+        <Link>TestProject1\Tests.cs</Link>
+      </Compile>
+      <Compile Update="TestProject\Properties\AssemblyInfo.cs">
+        <Link>TestProject1\Properties\AssemblyInfo.cs</Link>
+      </Compile>
     </ItemGroup>
 
 </Project>

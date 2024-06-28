@@ -7,16 +7,16 @@ namespace Project.Helpers
 {
     public class RevenueContext(DbContextOptions<RevenueContext> options) : DbContext(options)
     {
-        public virtual required DbSet<Individual> Individuals { get; set; }
-        public virtual required DbSet<Company> Companies { get; set; }
-        public virtual required DbSet<SoftwareSystem> SoftwareSystems { get; set; }
-        public virtual required DbSet<Contract> Contracts { get; set; }
-        public virtual required DbSet<Discount> Discounts { get; set; }
-        public virtual required DbSet<Payment> Payments { get; set; }
+        public virtual DbSet<Individual> Individuals { get; set; }
+        public virtual DbSet<Company> Companies { get; set; }
+        public virtual DbSet<SoftwareSystem> SoftwareSystems { get; set; }
+        public virtual DbSet<Contract> Contracts { get; set; }
+        public virtual DbSet<Discount> Discounts { get; set; }
+        public virtual DbSet<Payment> Payments { get; set; }
         
-        public virtual required DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
 
-        public virtual required DbSet<User> Users { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
